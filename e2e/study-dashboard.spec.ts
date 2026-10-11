@@ -3,12 +3,16 @@ import { expect, test, type Page } from '@playwright/test';
 
 async function expectNoAxeViolations(page: Page) {
   const results = await new AxeBuilder({ page }).analyze();
-  const summary = results.violations.map(
-    (violation) =>
-      `${violation.id}: ${violation.help} [${violation.nodes
-        .map((node) => node.target.join(' '))
-        .join('; ')}]`,
-  );
+  const summary = results.violations.map((violation) => {
+    const targets = violation.nodes
+      .map((node) => {
+        const detail = node.failureSummary?.replace(/\s+/g, ' ').trim();
+        const target = node.target.join(' ');
+        return detail ? `${target} (${detail})` : target;
+      })
+      .join('; ');
+    return `${violation.id}: ${violation.help} [${targets}]`;
+  });
   expect(summary).toEqual([]);
 }
 
@@ -59,6 +63,9 @@ test('adds, finds, completes, edits, and deletes a study task', async ({ page })
 
   await page.getByRole('button', { name: 'Use dark theme' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  const addTask = page.getByRole('button', { name: 'Add task' });
+  await expect(addTask).toHaveCSS('color', 'rgb(4, 47, 46)');
+  await expect(addTask).toHaveCSS('background-color', 'rgb(153, 246, 228)');
   await expectNoAxeViolations(page);
 });
 

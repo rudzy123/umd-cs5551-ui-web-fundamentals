@@ -628,9 +628,10 @@ a:hover {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .button,
-  .task-card,
-  .theme-toggle {
+  /* Hover-only: a resting transition would fade every control through low contrast when the theme tokens change. */
+  .button:hover,
+  .task-card:hover,
+  .theme-toggle:hover {
     transition:
       background-color 160ms ease,
       border-color 160ms ease,
